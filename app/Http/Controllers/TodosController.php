@@ -58,24 +58,26 @@ class TodosController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param $id
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function edit($id)
     {
         $edit = Todo::find($id);
 
+        if(auth()->user()->cannot('update', $edit)) {
+            return redirect()->route('todos.index')->with('fail', 'Not allowed to access');
+        }
+
         return view('todos.crud', compact('edit'));
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function update(Request $request, $id)
     {
@@ -85,20 +87,27 @@ class TodosController extends Controller
 
         $edit = Todo::find($id);
 
+        $this->authorize('update', $edit);
+
         $edit->update($request->all());
 
         return redirect()->route('todos.index')->with('success', 'Todo updated successfully');
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function destroy($id)
     {
-        Todo::destroy($id);
+        $edit = Todo::find($id);
+
+        if(auth()->user()->cannot('delete', $edit)) {
+            return redirect()->route('todos.index')->with('fail', 'Not allowed to access');
+        }
+
+        $edit->delete();
 
         return redirect()->route('todos.index')->with('success', 'Todo deleted successfully');
     }

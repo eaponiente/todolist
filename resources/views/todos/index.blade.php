@@ -10,6 +10,12 @@
                         {!! session('success') !!}
                     </div>
                 @endif
+
+                    @if(session('fail'))
+                        <div class="alert alert-danger">
+                            {!! session('fail') !!}
+                        </div>
+                    @endif
                 <div class="card">
                     <div class="card-header text-right">
                         <a href="{!! route('todos.create') !!}" class="btn btn-primary btn-sm">New Todo</a>
@@ -30,11 +36,15 @@
                                     <td>{!! $todo->details !!}</td>
                                     <td>{!! $todo->created_at !!}</td>
                                     <td>
+                                        @can('update', $todo)
                                         <a href="{!! route('todos.edit', $todo->id) !!}" class="btn btn-primary btn-sm">Edit</a>
+                                        @endcan
+                                        @can('delete', $todo)
                                         <form action="{!! route('todos.destroy', $todo->id) !!}" method="POST" style="display: inline;">
                                             {!! csrf_field() . method_field('DELETE') !!}
                                             <input type="submit" value="Remove" class="btn btn-danger btn-sm">
                                         </form>
+                                        @endcan
                                     </td>
                                 </tr>
                             @empty
